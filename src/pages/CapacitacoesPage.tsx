@@ -29,7 +29,7 @@ const materials: MaterialItem[] = [
 
 export function CapacitacoesPage() {
   return (
-    <section className="mx-auto max-w-7xl px-4 pb-12 pt-10">
+    <section className="mx-auto max-w-7xl px-4 pb-12 pt-10 animate-fade-in-up">
       <div className="hero-gradient relative overflow-hidden rounded-3xl p-8 md:p-12">
         <div className="absolute right-0 top-0 h-52 w-52 rounded-full bg-primary/20 blur-3xl" />
         <div className="relative z-10">
