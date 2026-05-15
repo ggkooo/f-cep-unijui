@@ -1,17 +1,19 @@
+import { lazy, Suspense, useEffect } from 'react'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import { Header } from './components/Header'
 import { HeroSection } from './components/HeroSection'
 import { QuickAnswersSection } from './components/QuickAnswersSection'
 import { Footer } from './components/Footer'
-import { MembersPage } from './pages/MembersPage'
-import { NormativasPage } from './pages/NormativasPage'
-import { ReunioesPage } from './pages/ReunioesPage'
-import { SubmissaoProjetosPage } from './pages/SubmissaoProjetosPage'
-import { DocumentosPage } from './pages/DocumentosPage'
-import { CapacitacoesPage } from './pages/CapacitacoesPage'
-import { DuvidasPage } from './pages/DuvidasPage'
-import { ContatoPage } from './pages/ContatoPage'
-import { useEffect } from 'react'
-import { Route, Routes, useLocation } from 'react-router-dom'
+import { BackButton } from './components/BackButton'
+
+const MembersPage = lazy(() => import('./pages/MembersPage').then(m => ({ default: m.MembersPage })))
+const NormativasPage = lazy(() => import('./pages/NormativasPage').then(m => ({ default: m.NormativasPage })))
+const ReunioesPage = lazy(() => import('./pages/ReunioesPage').then(m => ({ default: m.ReunioesPage })))
+const SubmissaoProjetosPage = lazy(() => import('./pages/SubmissaoProjetosPage').then(m => ({ default: m.SubmissaoProjetosPage })))
+const DocumentosPage = lazy(() => import('./pages/DocumentosPage').then(m => ({ default: m.DocumentosPage })))
+const CapacitacoesPage = lazy(() => import('./pages/CapacitacoesPage').then(m => ({ default: m.CapacitacoesPage })))
+const DuvidasPage = lazy(() => import('./pages/DuvidasPage').then(m => ({ default: m.DuvidasPage })))
+const ContatoPage = lazy(() => import('./pages/ContatoPage').then(m => ({ default: m.ContatoPage })))
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation()
@@ -39,9 +41,11 @@ function App() {
   return (
     <div className="min-h-screen bg-background-light text-slate-900 transition-colors duration-200 dark:bg-background-dark dark:text-slate-100">
       <ScrollToTop />
+      <BackButton />
       <Header />
       <main className="pt-16">
-        <Routes>
+        <Suspense fallback={null}>
+          <Routes>
           <Route
             element={
               <>
@@ -68,7 +72,8 @@ function App() {
             }
             path="*"
           />
-        </Routes>
+          </Routes>
+        </Suspense>
       </main>
       <Footer />
     </div>
