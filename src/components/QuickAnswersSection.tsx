@@ -7,6 +7,10 @@ type QuickAnswer = {
   href: string
 }
 
+type QuickAnswerCardProps = QuickAnswer & {
+  delayClass?: string
+}
+
 const quickAnswers: QuickAnswer[] = [
   {
     icon: 'groups',
@@ -58,16 +62,15 @@ const quickAnswers: QuickAnswer[] = [
   },
 ]
 
-function QuickAnswerCard({ icon, title, description, href }: QuickAnswer) {
+function QuickAnswerCard({ icon, title, description, href, delayClass }: QuickAnswerCardProps) {
   const isInternalLink = href.startsWith('/')
+  const cardClassName = `group block rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 animate-fade-in-up ${delayClass ?? ''}`
+  const iconClassName = 'mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-primary transition-transform duration-300 group-hover:scale-110 dark:bg-blue-900/30 dark:text-blue-400'
 
   if (isInternalLink) {
     return (
-      <Link
-        className="group block rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
-        to={href}
-      >
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-primary transition-transform group-hover:scale-110 dark:bg-blue-900/30 dark:text-blue-400">
+      <Link className={cardClassName} to={href}>
+        <div className={iconClassName}>
           <span className="material-icons-outlined">{icon}</span>
         </div>
         <h3 className="mb-2 font-semibold text-slate-900 dark:text-white">{title}</h3>
@@ -77,11 +80,8 @@ function QuickAnswerCard({ icon, title, description, href }: QuickAnswer) {
   }
 
   return (
-    <a
-      className="group block rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
-      href={href}
-    >
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-primary transition-transform group-hover:scale-110 dark:bg-blue-900/30 dark:text-blue-400">
+    <a className={cardClassName} href={href}>
+      <div className={iconClassName}>
         <span className="material-icons-outlined">{icon}</span>
       </div>
       <h3 className="mb-2 font-semibold text-slate-900 dark:text-white">{title}</h3>
@@ -92,11 +92,11 @@ function QuickAnswerCard({ icon, title, description, href }: QuickAnswer) {
 
 export function QuickAnswersSection() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-12" id="quick-access">
+    <section className="mx-auto max-w-7xl px-4 py-12 animate-fade-in-up" id="quick-access">
       <h2 className="mb-8 text-2xl font-bold text-slate-900 dark:text-white">Respostas Rápidas</h2>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {quickAnswers.map((item) => (
-          <QuickAnswerCard key={item.title} {...item} />
+        {quickAnswers.map((item, index) => (
+          <QuickAnswerCard key={item.title} delayClass={`stagger-${(index % 4) + 1}`} {...item} />
         ))}
       </div>
     </section>
