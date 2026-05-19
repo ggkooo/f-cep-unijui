@@ -3,9 +3,13 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { logout, isLoggedIn, validateAuthToken } from '../../services/authService'
 import { AdminSidebar } from './AdminSidebar'
 import { getDocumentSections, updateDocumentSections, type DocumentSectionResource } from '../../services/documentService'
+import type { DocumentItemResource } from '../../services/types'
 
-const defaultSection: DocumentSectionResource = {
-  id: Date.now(),
+type DocumentItemState = DocumentItemResource & { uploadFile?: File | null }
+type DocumentSectionState = DocumentSectionResource & { items: DocumentItemState[] }
+
+const defaultSection: DocumentSectionState = {
+  id: -Date.now(),
   title: 'Nova seção',
   sort_order: 0,
   items: [],
@@ -13,10 +17,11 @@ const defaultSection: DocumentSectionResource = {
 
 export function AdminDocumentsPage() {
   const navigate = useNavigate()
-  const [sections, setSections] = useState<DocumentSectionResource[]>([])
+  const [sections, setSections] = useState<DocumentSectionState[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [isAuthValid, setIsAuthValid] = useState<boolean | null>(null)
 
   useEffect(() => {
@@ -54,10 +59,13 @@ export function AdminDocumentsPage() {
   const handleSave = async () => {
     setSaving(true)
     setError(null)
+    setSuccess(null)
 
     try {
-      const updated = await updateDocumentSections(sections)
-      setSections(updated)
+      await updateDocumentSections(sections)
+      const refreshedSections = await getDocumentSections()
+      setSections(refreshedSections)
+      setSuccess('Seções e documentos salvos com sucesso.')
     } catch (err) {
       setError('Erro ao salvar as seções de documentos.')
     } finally {
@@ -66,12 +74,19 @@ export function AdminDocumentsPage() {
   }
 
   const updateSection = (index: number, next: Partial<DocumentSectionResource>) => {
+    setSuccess(null)
     setSections((current) =>
       current.map((section, idx) => (idx === index ? { ...section, ...next } : section)),
     )
   }
 
-  const updateItem = (sectionIndex: number, itemIndex: number, field: keyof DocumentSectionResource['items'][number], value: string) => {
+  const updateItem = (
+    sectionIndex: number,
+    itemIndex: number,
+    field: keyof DocumentSectionResource['items'][number] | 'uploadFile',
+    value: string | File | null,
+  ) => {
+    setSuccess(null)
     setSections((current) =>
       current.map((section, idx) => {
         if (idx !== sectionIndex) return section
@@ -95,11 +110,12 @@ export function AdminDocumentsPage() {
       ...current,
       {
         ...defaultSection,
-        id: Date.now(),
+        id: -Date.now(),
         title: `Nova seção ${current.length + 1}`,
         sort_order: current.length + 1,
       },
     ])
+    setSuccess('Seção adicionada. Clique em salvar para confirmar as alterações.')
   }
 
   const addItem = (sectionIndex: number) => {
@@ -112,7 +128,7 @@ export function AdminDocumentsPage() {
               items: [
                 ...section.items,
                 {
-                  id: Date.now(),
+                  id: -Date.now(),
                   name: 'Novo documento',
                   description: '',
                   file_url: '',
@@ -123,6 +139,7 @@ export function AdminDocumentsPage() {
             },
       ),
     )
+    setSuccess('Documento adicionado. Clique em salvar para confirmar.')
   }
 
   return (
@@ -158,6 +175,12 @@ export function AdminDocumentsPage() {
             </div>
           ) : null}
 
+          {success ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-200">
+              {success}
+            </div>
+          ) : null}
+
           <div className="flex flex-wrap items-center justify-between gap-3">
             <button
               type="button"
@@ -179,7 +202,7 @@ export function AdminDocumentsPage() {
           <div className="space-y-8">
             {sections.map((section, sectionIndex) => (
               <div key={section.id} className="rounded-3xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900">
-                <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                   <div className="flex-1">
                     <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Título da seção</label>
                     <input
@@ -198,9 +221,9 @@ export function AdminDocumentsPage() {
                 </div>
 
                 <div className="space-y-5">
-                  {section.items.map((item, itemIndex) => (
+                  {section.items.map((item: DocumentItemState, itemIndex) => (
                     <div key={item.id} className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-950">
-                      <div className="grid gap-5 md:grid-cols-3">
+                      <div className="grid gap-5 md:grid-cols-2">
                         <div>
                           <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Nome do documento</label>
                           <input
@@ -217,13 +240,32 @@ export function AdminDocumentsPage() {
                             className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                           />
                         </div>
+                      </div>
+
+                      <div className="mt-5 grid gap-5 md:grid-cols-2 md:items-center">
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">URL do arquivo</label>
+                          <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Upload do arquivo</label>
                           <input
-                            value={item.file_url ?? ''}
-                            onChange={(event) => updateItem(sectionIndex, itemIndex, 'file_url', event.target.value)}
-                            className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                            type="file"
+                            accept="*"
+                            onChange={(event) => {
+                              const file = event.target.files?.[0] ?? null
+                              updateItem(sectionIndex, itemIndex, 'uploadFile', file)
+                              if (file) {
+                                updateItem(sectionIndex, itemIndex, 'original_filename', file.name)
+                              }
+                            }}
+                            className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition file:mr-4 file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                           />
+                        </div>
+                        <div className="flex items-center">
+                          {item.uploadFile ? (
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Arquivo selecionado: {item.uploadFile.name}</p>
+                          ) : item.original_filename ? (
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Arquivo atual: {item.original_filename}</p>
+                          ) : (
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Nenhum arquivo carregado.</p>
+                          )}
                         </div>
                       </div>
                     </div>
