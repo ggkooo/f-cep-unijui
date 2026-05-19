@@ -3,10 +3,12 @@ import { getContactInfo, type ContactInfoResource } from '../services/contactSer
 
 const defaultContactInfo: ContactInfoResource = {
   id: 1,
+  institution_name: 'Comitê de Ética em Pesquisa da UNIJUÍ',
   address: 'Rua do Comércio, 3000 - Bairro Universitário',
+  city_state_zip: 'Ijuí/RS - CEP 98700-000',
   phone: '(55) 3332-0200',
   email: 'cep@unijui.edu.br',
-  hours: 'Segunda a sexta-feira: 8h às 11h30 e 13h30 às 17h',
+  service_hours: 'Segunda a sexta-feira: 8h às 11h30 e 13h30 às 17h',
 }
 
 export function ContatoPage() {
@@ -52,12 +54,17 @@ export function ContatoPage() {
           </header>
 
           <div className="space-y-5 p-5 text-sm text-slate-700 dark:text-slate-200">
-            <p className="text-base font-medium text-slate-900 dark:text-white">Comitê de Ética em Pesquisa da UNIJUÍ</p>
+            <p className="text-base font-medium text-slate-900 dark:text-white">
+              {info.institution_name ?? 'Comitê de Ética em Pesquisa da UNIJUÍ'}
+            </p>
 
             <div>
               <p className="font-semibold text-slate-900 dark:text-white">Endereço:</p>
               <p>{info.address ?? 'Rua do Comércio, 3000 - Bairro Universitário'}</p>
-              {info.address ? null : <p>Ijuí/RS - CEP 98700-000</p>}
+            </div>
+            <div>
+              <p className="font-semibold text-slate-900 dark:text-white">Cidade / Estado / CEP:</p>
+              <p>{info.city_state_zip ?? 'Ijuí/RS - CEP 98700-000'}</p>
             </div>
 
             <div>
@@ -72,7 +79,7 @@ export function ContatoPage() {
 
             <div>
               <p className="font-semibold text-slate-900 dark:text-white">Horário de atendimento:</p>
-              <p>{info.hours ?? 'Segunda a sexta-feira: 8h às 11h30 e 13h30 às 17h'}</p>
+              <p>{info.service_hours ?? 'Segunda a sexta-feira: 8h às 11h30 e 13h30 às 17h'}</p>
             </div>
           </div>
         </article>
