@@ -81,8 +81,8 @@ export type TutorialResource = {
 export type TutorialVideoResource = {
   id: number
   title: string
+  url?: string | null
   thumbnail_url?: string | null
-  video_url?: string | null
   sort_order?: number
 }
 
@@ -106,10 +106,12 @@ export type GuidanceSectionResource = {
 
 export type ContactInfoResource = {
   id: number
+  institution_name?: string
   address?: string
+  city_state_zip?: string
   phone?: string
   email?: string
-  hours?: string
+  service_hours?: string
   website?: string
   [key: string]: unknown
 }
