@@ -2,6 +2,17 @@ import { apiGet, apiPut } from './apiClient'
 import type { ContactInfoResource } from './types'
 
 export type { ContactInfoResource }
-export const getContactInfo = (): Promise<ContactInfoResource> => apiGet<ContactInfoResource>('/api/contact-info')
-export const updateContactInfo = (data: ContactInfoResource): Promise<ContactInfoResource> =>
-  apiPut<ContactInfoResource>('/api/contact-info', data)
+const unwrapContactInfoResponse = (response: ContactInfoResource | { data: ContactInfoResource }): ContactInfoResource => {
+  const payload = response as { data?: ContactInfoResource }
+  return payload.data ? payload.data : (response as ContactInfoResource)
+}
+
+export const getContactInfo = async (): Promise<ContactInfoResource> => {
+  const response = await apiGet<ContactInfoResource | { data: ContactInfoResource }>('/api/contact-info')
+  return unwrapContactInfoResponse(response)
+}
+
+export const updateContactInfo = async (data: ContactInfoResource): Promise<ContactInfoResource> => {
+  const response = await apiPut<ContactInfoResource | { data: ContactInfoResource }>('/api/contact-info', data)
+  return unwrapContactInfoResponse(response)
+}
