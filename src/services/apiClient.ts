@@ -38,30 +38,46 @@ async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T
     throw new Error(`Erro ao carregar ${url}: ${response.status} ${response.statusText} ${body}`)
   }
 
+  if (response.status === 204) {
+    return {} as T
+  }
+
+  const contentType = response.headers.get('Content-Type')
+  if (!contentType || !contentType.includes('application/json')) {
+    return {} as T
+  }
+
   return response.json()
 }
 
 export const apiGet = <T>(path: string): Promise<T> => apiRequest<T>(path)
+const buildBody = (body: unknown): BodyInit | undefined =>
+  body instanceof FormData ? body : JSON.stringify(body)
+
+const buildJsonHeaders = (body: unknown, options: RequestInit = {}): HeadersInit =>
+  body instanceof FormData
+    ? (options.headers as HeadersInit | undefined)
+    : {
+        'Content-Type': 'application/json',
+        ...(options.headers as Record<string, string> | undefined),
+      }
+
 export const apiPost = <T>(path: string, body: unknown, options: RequestInit = {}): Promise<T> =>
   apiRequest<T>(path, {
     method: 'POST',
-    body: JSON.stringify(body),
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers as Record<string, string> | undefined),
-    },
+    body: buildBody(body),
+    headers: buildJsonHeaders(body, options),
     ...options,
   })
 export const apiPut = <T>(path: string, body: unknown, options: RequestInit = {}): Promise<T> =>
   apiRequest<T>(path, {
     method: 'PUT',
-    body: JSON.stringify(body),
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers as Record<string, string> | undefined),
-    },
+    body: buildBody(body),
+    headers: buildJsonHeaders(body, options),
     ...options,
   })
+export const apiSave = <T>(path: string, body: unknown, id?: number): Promise<T> =>
+  id && id > 0 ? apiPut<T>(`${path}/${id}`, body) : apiPost<T>(path, body)
 export const apiPatch = <T>(path: string, body: unknown, options: RequestInit = {}): Promise<T> =>
   apiRequest<T>(path, {
     method: 'PATCH',
