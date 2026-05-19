@@ -6,10 +6,12 @@ import { getContactInfo, updateContactInfo, type ContactInfoResource } from '../
 
 const defaultContactInfo: ContactInfoResource = {
   id: 1,
+  institution_name: '',
   address: '',
+  city_state_zip: '',
   phone: '',
   email: '',
-  hours: '',
+  service_hours: '',
 }
 
 export function AdminContactPage() {
@@ -60,8 +62,9 @@ export function AdminContactPage() {
     setErrorMessage(null)
 
     try {
-      const updated = await updateContactInfo(contactInfo)
-      setContactInfo(updated)
+      await updateContactInfo(contactInfo)
+      const refreshedContactInfo = await getContactInfo()
+      setContactInfo(refreshedContactInfo)
     } catch (error) {
       setErrorMessage('Erro ao salvar informações de contato.')
     } finally {
@@ -105,12 +108,32 @@ export function AdminContactPage() {
             <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900">
               <form className="space-y-5" onSubmit={(event) => event.preventDefault()}>
                 <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Nome da instituição</label>
+                  <input
+                    value={contactInfo.institution_name ?? ''}
+                    onChange={(event) => setContactInfo({ ...contactInfo, institution_name: event.target.value })}
+                    className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                    placeholder="Comitê de Ética em Pesquisa da UNIJUÍ"
+                  />
+                </div>
+
+                <div>
                   <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Endereço</label>
                   <input
                     value={contactInfo.address ?? ''}
                     onChange={(event) => setContactInfo({ ...contactInfo, address: event.target.value })}
                     className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                     placeholder="Rua, número, bairro"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Cidade / Estado / CEP</label>
+                  <input
+                    value={contactInfo.city_state_zip ?? ''}
+                    onChange={(event) => setContactInfo({ ...contactInfo, city_state_zip: event.target.value })}
+                    className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                    placeholder="Ijuí/RS - CEP 98700-000"
                   />
                 </div>
 
@@ -138,8 +161,8 @@ export function AdminContactPage() {
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Horário de atendimento</label>
                   <textarea
-                    value={contactInfo.hours ?? ''}
-                    onChange={(event) => setContactInfo({ ...contactInfo, hours: event.target.value })}
+                    value={contactInfo.service_hours ?? ''}
+                    onChange={(event) => setContactInfo({ ...contactInfo, service_hours: event.target.value })}
                     className="min-h-[120px] w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                     placeholder="Segunda a sexta-feira: 8h às 11h30 e 13h30 às 17h"
                   />
