@@ -14,6 +14,16 @@ const DocumentosPage = lazy(() => import('./pages/DocumentosPage').then(m => ({ 
 const CapacitacoesPage = lazy(() => import('./pages/CapacitacoesPage').then(m => ({ default: m.CapacitacoesPage })))
 const DuvidasPage = lazy(() => import('./pages/DuvidasPage').then(m => ({ default: m.DuvidasPage })))
 const ContatoPage = lazy(() => import('./pages/ContatoPage').then(m => ({ default: m.ContatoPage })))
+const AdminLoginPage = lazy(() => import('./pages/admin').then(m => ({ default: m.AdminLoginPage })))
+const AdminPage = lazy(() => import('./pages/admin').then(m => ({ default: m.AdminPage })))
+const AdminContactPage = lazy(() => import('./pages/admin').then(m => ({ default: m.AdminContactPage })))
+const AdminMembersPage = lazy(() => import('./pages/admin').then(m => ({ default: m.AdminMembersPage })))
+const AdminDocumentsPage = lazy(() => import('./pages/admin').then(m => ({ default: m.AdminDocumentsPage })))
+const AdminNormativasPage = lazy(() => import('./pages/admin').then(m => ({ default: m.AdminNormativasPage })))
+const AdminCapacitacoesPage = lazy(() => import('./pages/admin').then(m => ({ default: m.AdminCapacitacoesPage })))
+const AdminDuvidasPage = lazy(() => import('./pages/admin').then(m => ({ default: m.AdminDuvidasPage })))
+const AdminReunioesPage = lazy(() => import('./pages/admin').then(m => ({ default: m.AdminReunioesPage })))
+const AdminSubmissaoProjetosPage = lazy(() => import('./pages/admin').then(m => ({ default: m.AdminSubmissaoProjetosPage })))
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation()
@@ -38,10 +48,12 @@ function ScrollToTop() {
 }
 
 function App() {
+  const isAdminRoute = useLocation().pathname.startsWith('/admin')
+
   return (
     <div className="min-h-screen bg-background-light text-slate-900 transition-colors duration-200 dark:bg-background-dark dark:text-slate-100">
       <ScrollToTop />
-      <BackButton />
+      {!isAdminRoute ? <BackButton /> : null}
       <Header />
       <main className="pt-16">
         <Suspense fallback={null}>
@@ -63,6 +75,16 @@ function App() {
           <Route element={<CapacitacoesPage />} path="/capacitacoes" />
           <Route element={<DuvidasPage />} path="/duvidas" />
           <Route element={<ContatoPage />} path="/contato" />
+          <Route element={<AdminLoginPage />} path="/admin/login" />
+          <Route element={<AdminPage />} path="/admin" />
+          <Route element={<AdminContactPage />} path="/admin/contato" />
+          <Route element={<AdminMembersPage />} path="/admin/membros" />
+          <Route element={<AdminDocumentsPage />} path="/admin/documentos" />
+          <Route element={<AdminNormativasPage />} path="/admin/normativas" />
+          <Route element={<AdminCapacitacoesPage />} path="/admin/capacitacoes" />
+          <Route element={<AdminDuvidasPage />} path="/admin/duvidas" />
+          <Route element={<AdminReunioesPage />} path="/admin/reunioes" />
+          <Route element={<AdminSubmissaoProjetosPage />} path="/admin/submissao-projetos" />
           <Route
             element={
               <>
@@ -75,7 +97,7 @@ function App() {
           </Routes>
         </Suspense>
       </main>
-      <Footer />
+      {!isAdminRoute ? <Footer /> : null}
     </div>
   )
 }
