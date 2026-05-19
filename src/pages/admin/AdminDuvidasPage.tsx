@@ -80,7 +80,7 @@ export function AdminDuvidasPage() {
     setSections((current) => [
       ...current,
       {
-        id: Date.now(),
+        id: -Date.now(),
         title: 'Nova pergunta',
         warning: '',
         points: ['Nova resposta'],
