@@ -86,7 +86,7 @@ export function AdminReunioesPage() {
     setMeetingSchedules((current) => [
       ...current,
       {
-        id: Date.now(),
+        id: -Date.now(),
         year: new Date().getFullYear(),
         meeting_date: '01/01/2025',
         submission_deadline: '01/01/2025',
@@ -98,7 +98,7 @@ export function AdminReunioesPage() {
     setServiceHours((current) => [
       ...current,
       {
-        id: Date.now(),
+        id: -Date.now(),
         weekday: 'Segunda a sexta',
         hours: '08:00 às 12:00',
         sort_order: current.length + 1,
