@@ -67,7 +67,7 @@ export function AdminCapacitacoesPage() {
     setTopics((current) => [
       ...current,
       {
-        id: Date.now(),
+        id: -Date.now(),
         title: 'Novo tema',
         sort_order: current.length + 1,
       },
