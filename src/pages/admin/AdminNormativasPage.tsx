@@ -3,9 +3,13 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { logout, isLoggedIn, validateAuthToken } from '../../services/authService'
 import { AdminSidebar } from './AdminSidebar'
 import { getNormativeSections, updateNormativeSections, type NormativeSectionResource } from '../../services/normativeService'
+import type { NormativeItemResource } from '../../services/types'
 
-const defaultSection: NormativeSectionResource = {
-  id: Date.now(),
+type NormativeItemState = NormativeItemResource & { uploadFile?: File | null }
+type NormativeSectionState = NormativeSectionResource & { items: NormativeItemState[] }
+
+const defaultSection: NormativeSectionState = {
+  id: -Date.now(),
   title: 'Nova seção',
   sort_order: 0,
   items: [],
@@ -13,10 +17,11 @@ const defaultSection: NormativeSectionResource = {
 
 export function AdminNormativasPage() {
   const navigate = useNavigate()
-  const [sections, setSections] = useState<NormativeSectionResource[]>([])
+  const [sections, setSections] = useState<NormativeSectionState[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [isAuthValid, setIsAuthValid] = useState<boolean | null>(null)
 
   useEffect(() => {
@@ -54,10 +59,13 @@ export function AdminNormativasPage() {
   const handleSave = async () => {
     setSaving(true)
     setError(null)
+    setSuccess(null)
 
     try {
-      const updated = await updateNormativeSections(sections)
-      setSections(updated)
+      await updateNormativeSections(sections)
+      const refreshedSections = await getNormativeSections()
+      setSections(refreshedSections)
+      setSuccess('Seções e normativas salvas com sucesso.')
     } catch (err) {
       setError('Erro ao salvar as seções de normativas.')
     } finally {
@@ -65,13 +73,20 @@ export function AdminNormativasPage() {
     }
   }
 
-  const updateSection = (index: number, next: Partial<NormativeSectionResource>) => {
+  const updateSection = (index: number, next: Partial<NormativeSectionState>) => {
+    setSuccess(null)
     setSections((current) =>
       current.map((section, idx) => (idx === index ? { ...section, ...next } : section)),
     )
   }
 
-  const updateItem = (sectionIndex: number, itemIndex: number, field: keyof NormativeSectionResource['items'][number], value: string) => {
+  const updateItem = (
+    sectionIndex: number,
+    itemIndex: number,
+    field: keyof NormativeItemState,
+    value: string | File | null,
+  ) => {
+    setSuccess(null)
     setSections((current) =>
       current.map((section, idx) => {
         if (idx !== sectionIndex) return section
@@ -95,7 +110,7 @@ export function AdminNormativasPage() {
       ...current,
       {
         ...defaultSection,
-        id: Date.now(),
+        id: -Date.now(),
         title: `Nova seção ${current.length + 1}`,
         sort_order: current.length + 1,
       },
@@ -112,16 +127,18 @@ export function AdminNormativasPage() {
               items: [
                 ...section.items,
                 {
-                  id: Date.now(),
+                  id: -Date.now(),
                   title: 'Nova normativa',
                   file_url: '',
                   original_filename: '',
                   sort_order: section.items.length + 1,
+                  uploadFile: null,
                 },
               ],
             },
       ),
     )
+    setSuccess('Normativa adicionada. Selecione um arquivo e clique em salvar para confirmar.')
   }
 
   return (
@@ -157,6 +174,12 @@ export function AdminNormativasPage() {
             </div>
           ) : null}
 
+          {success ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-200">
+              {success}
+            </div>
+          ) : null}
+
           <div className="flex flex-wrap items-center justify-between gap-3">
             <button
               type="button"
@@ -178,7 +201,7 @@ export function AdminNormativasPage() {
           <div className="space-y-8">
             {sections.map((section, sectionIndex) => (
               <div key={section.id} className="rounded-3xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900">
-                <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                   <div className="flex-1">
                     <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Título da seção</label>
                     <input
@@ -190,39 +213,45 @@ export function AdminNormativasPage() {
                   <button
                     type="button"
                     onClick={() => addItem(sectionIndex)}
-                    className="rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-white transition hover:bg-primary-dark"
+                    className="self-end rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-white transition hover:bg-primary-dark md:self-auto"
                   >
                     Adicionar normativa
                   </button>
                 </div>
 
                 <div className="space-y-5">
-                  {section.items.map((item, itemIndex) => (
+                  {section.items.map((item: NormativeItemState, itemIndex) => (
                     <div key={item.id} className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-950">
-                      <div className="grid gap-5 md:grid-cols-3">
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Título</label>
+                        <input
+                          value={item.title}
+                          onChange={(event) => updateItem(sectionIndex, itemIndex, 'title', event.target.value)}
+                          className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                        />
+                      </div>
+
+                      <div className="mt-5 grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Título</label>
+                          <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Upload do arquivo</label>
                           <input
-                            value={item.title}
-                            onChange={(event) => updateItem(sectionIndex, itemIndex, 'title', event.target.value)}
-                            className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                            type="file"
+                            accept=".pdf,.doc,.docx,.txt"
+                            onChange={(event) => {
+                              const file = event.target.files?.[0] ?? null
+                              updateItem(sectionIndex, itemIndex, 'uploadFile', file)
+                            }}
+                            className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition file:mr-4 file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                           />
                         </div>
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">URL do arquivo</label>
-                          <input
-                            value={item.file_url ?? ''}
-                            onChange={(event) => updateItem(sectionIndex, itemIndex, 'file_url', event.target.value)}
-                            className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-                          />
-                        </div>
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Nome do arquivo</label>
-                          <input
-                            value={item.original_filename ?? ''}
-                            onChange={(event) => updateItem(sectionIndex, itemIndex, 'original_filename', event.target.value)}
-                            className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-                          />
+                        <div className="flex items-center text-sm text-slate-500 dark:text-slate-400">
+                          {item.uploadFile ? (
+                            <p>Arquivo selecionado: {item.uploadFile.name}</p>
+                          ) : item.original_filename ? (
+                            <p>Arquivo atual: {item.original_filename}</p>
+                          ) : (
+                            <p>Nenhum arquivo carregado. Selecione um arquivo antes de salvar.</p>
+                          )}
                         </div>
                       </div>
                     </div>
