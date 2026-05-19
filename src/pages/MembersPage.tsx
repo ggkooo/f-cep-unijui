@@ -1,147 +1,38 @@
-type MemberRow = {
-  category: 'Coordenadores' | 'Membros' | 'Representantes de Participante de Pesquisa' | 'Secretaria'
-  role: string
-  name: string
-  education: string
-  qualification: string
-  notes?: string
+import { useEffect, useState } from 'react'
+import { getMembers, type MemberResource } from '../services/membersService'
+
+type MemberRow = Omit<MemberResource, 'id' | 'notes' | 'sort_order'> & {
+  id?: number
+  notes?: string | null
+  sort_order?: number
 }
 
-const members: MemberRow[] = [
-  {
-    category: 'Coordenadores',
-    role: 'Coordenador',
-    name: 'Prof. Dr. Aldemir Berwig',
-    education: 'Direito e Administração',
-    qualification: 'Doutorado em Educação nas Ciências - UNIJUÍ',
-  },
-  {
-    category: 'Coordenadores',
-    role: 'Coordenador-Adjunto',
-    name: 'Prof. Dr. Matias Nunes Frizzo',
-    education: 'Farmácia',
-    qualification: 'Doutorado em Biologia Celular e Molecular - PPGAIS/UNIJUÍ',
-  },
-  {
-    category: 'Membros',
-    role: 'Membro',
-    name: 'Prof. Dr. Airton Adelar Mueller',
-    education: 'História',
-    qualification: 'Doutorado em Sociologia - PPGDR/UNIJUÍ',
-  },
-  {
-    category: 'Membros',
-    role: 'Membro',
-    name: 'Profa. Dra. Christiane de Fátima Colet',
-    education: 'Farmácia',
-    qualification: 'Doutorado em Ciências Farmacêuticas - PPGAIS/UNIJUÍ',
-  },
-  {
-    category: 'Membros',
-    role: 'Membro',
-    name: 'Prof. Dr. Daniel Claudy da Silveira',
-    education: 'Economia',
-    qualification: 'Doutorado em Desenvolvimento Regional - UNIJUÍ',
-  },
-  {
-    category: 'Membros',
-    role: 'Membro',
-    name: 'Prof. Dr. Doglas Cesar Lucas',
-    education: 'Direito',
-    qualification: 'Pós-Doutorado em Direito - PPGD/UNIJUÍ',
-  },
-  {
-    category: 'Membros',
-    role: 'Membro',
-    name: 'Profa. Dra. Eliane Roseli Winkelmann',
-    education: 'Fisioterapia',
-    qualification: 'Pós-Doutorado em Ciências da Saúde - PPGAIS/UNIJUÍ',
-  },
-  {
-    category: 'Membros',
-    role: 'Membro',
-    name: 'Prof. Dr. José Antonio Gonzalez da Silva',
-    education: 'Agronomia',
-    qualification: 'Doutorado em Agronomia - PPGSAS/UNIJUÍ',
-  },
-  {
-    category: 'Membros',
-    role: 'Membro',
-    name: 'Profa. Dr. José Pedro Boufleuer',
-    education: 'Filosofia',
-    qualification: 'Doutorado em Educação - PPGEC/UNIJUÍ',
-  },
-  {
-    category: 'Membros',
-    role: 'Membro',
-    name: 'Profa. Dra. Luciana Moro de Souza',
-    education: 'Ciências Contábeis',
-    qualification: 'Doutorado em Desenvolvimento Regional - UNIJUÍ',
-  },
-  {
-    category: 'Membros',
-    role: 'Membro',
-    name: 'Profa. Dra. Marcia Regina Conceição de Almeida',
-    education: 'Comunicação Social',
-    qualification: 'Doutorado em Comunicação - UNIJUÍ',
-  },
-  {
-    category: 'Membros',
-    role: 'Membro',
-    name: 'Profa. Dra. Moane Marchesan Krug',
-    education: 'Fisioterapia e Educação Física',
-    qualification: 'Doutorado em Educação Física - UNIJUÍ',
-  },
-  {
-    category: 'Membros',
-    role: 'Membro',
-    name: 'Profa. Dra. Taciana Enderle',
-    education: 'Engenharia Elétrica',
-    qualification: 'Doutorado em Modelagem Matemática - PPGSAS/UNIJUÍ',
-  },
-  {
-    category: 'Membros',
-    role: 'Membro',
-    name: 'Prof. Dr. Vitor Antunes de Oliveira',
-    education: 'Biomedicina',
-    qualification: 'Doutorado em Ciências Biológicas - Bioquímica Toxicológica - UNIJUÍ',
-  },
-  {
-    category: 'Membros',
-    role: 'Membro',
-    name: 'Profa. Dra. Leonir Terezinha Uhde',
-    education: 'Agronomia',
-    qualification: 'Doutorado em Ciência do solo - UNIJUÍ',
-  },
-  {
-    category: 'Representantes de Participante de Pesquisa',
-    role: 'Representante',
-    name: 'Rosane Simon',
-    education: 'Direito',
-    qualification: 'Indicada pelo Conselho Municipal de Saúde de Ijuí',
-  },
-  {
-    category: 'Representantes de Participante de Pesquisa',
-    role: 'Representante',
-    name: 'Marcia Andrea Ullmann',
-    education: 'Nutrição',
-    qualification: 'Indicada pelo Conselho Municipal de Saúde de Ijuí',
-  },
-  {
-    category: 'Representantes de Participante de Pesquisa',
-    role: 'Representante',
-    name: 'Eliana Elisa Rehfeld Gheno',
-    education: 'Enfermagem e Obstetrícia',
-    qualification: 'Mestrado em Atenção Integral à Saúde',
-    notes: 'Indicada pelo Conselho Municipal de Saúde de Ijuí',
-  },
-  {
-    category: 'Secretaria',
-    role: 'Secretária Responsável',
-    name: 'Amália Iracema Pasche',
-    education: '-',
-    qualification: 'Telefone: (55) 3332-0301',
-  },
+// 1. Definimos a ordem de prioridade das categorias
+const categoryPriority: Record<string, number> = {
+  'Coordenadores': 1,
+  'Representantes de Participante de Pesquisa': 2,
+  'Membros': 3,
+  'Secretaria': 4,
+}
+
+// Função auxiliar para ordenar os membros
+const sortMembers = (data: MemberRow[]) => {
+  return [...data].sort((a, b) => {
+    // Primeiro ordena pela prioridade da categoria
+    const priorityA = categoryPriority[a.category] || 99
+    const priorityB = categoryPriority[b.category] || 99
+
+    if (priorityA !== priorityB) {
+      return priorityA - priorityB
+    }
+
+    // Se forem da mesma categoria, ordena por nome (alfabética)
+    return a.name.localeCompare(b.name)
+  })
+}
+
+const defaultMembers: MemberRow[] = [
+  // ... seus membros aqui ...
 ]
 
 const categoryStyles: Record<MemberRow['category'], string> = {
@@ -152,8 +43,25 @@ const categoryStyles: Record<MemberRow['category'], string> = {
 }
 
 export function MembersPage() {
+  // Inicializamos já ordenando os dados padrão
+  const [members, setMembers] = useState<MemberRow[]>(sortMembers(defaultMembers))
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    getMembers()
+      .then((data) => {
+        // Ordenamos os dados que vem da API antes de salvar no estado
+        const sorted = sortMembers(data)
+        setMembers(sorted)
+      })
+      .catch(() => setError('Não foi possível carregar os membros do servidor.'))
+      .finally(() => setLoading(false))
+  }, [])
+
   return (
     <section className="mx-auto max-w-7xl px-4 pb-12 pt-10 animate-fade-in-up">
+      {/* ... Restante do seu código JSX permanece o mesmo ... */}
       <div className="hero-gradient relative overflow-hidden rounded-3xl p-8 md:p-12">
         <div className="absolute right-0 top-0 h-52 w-52 rounded-full bg-primary/20 blur-3xl" />
         <div className="relative z-10">
@@ -163,6 +71,18 @@ export function MembersPage() {
           </p>
         </div>
       </div>
+
+      {loading ? (
+        <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+          Carregando membros...
+        </div>
+      ) : null}
+
+      {error ? (
+        <div className="mt-8 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-900 dark:border-rose-900/40 dark:bg-rose-900/20 dark:text-rose-200">
+          {error}
+        </div>
+      ) : null}
 
       <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="overflow-x-auto">

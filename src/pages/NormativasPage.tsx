@@ -1,3 +1,6 @@
+import { useEffect, useState } from 'react'
+import { getNormativeSections } from '../services/normativeService'
+
 type NormativeItem = {
   title: string
   file: string
@@ -8,7 +11,7 @@ type NormativeSection = {
   items: NormativeItem[]
 }
 
-const sections: NormativeSection[] = [
+const defaultSections: NormativeSection[] = [
   {
     title: 'Normativas',
     items: [
@@ -157,6 +160,27 @@ const sections: NormativeSection[] = [
 ]
 
 export function NormativasPage() {
+  const [sections, setSections] = useState<NormativeSection[]>(defaultSections)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    getNormativeSections()
+      .then((sections) => {
+        setSections(
+          sections.map((section) => ({
+            title: section.title,
+            items: section.items.map((item) => ({
+              title: item.title,
+              file: item.file_url,
+            })),
+          })),
+        )
+      })
+      .catch(() => setError('Não foi possível carregar as normas do servidor.'))
+      .finally(() => setLoading(false))
+  }, [])
+
   return (
     <section className="mx-auto max-w-7xl px-4 pb-12 pt-10 animate-fade-in-up">
       <div className="hero-gradient relative overflow-hidden rounded-3xl p-8 md:p-12">
@@ -168,6 +192,18 @@ export function NormativasPage() {
           </p>
         </div>
       </div>
+
+      {loading ? (
+        <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+          Carregando normativas...
+        </div>
+      ) : null}
+
+      {error ? (
+        <div className="mt-8 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-900 dark:border-rose-900/40 dark:bg-rose-900/20 dark:text-rose-200">
+          {error}
+        </div>
+      ) : null}
 
       <div className="mt-8 space-y-8">
         {sections.map((section) => (

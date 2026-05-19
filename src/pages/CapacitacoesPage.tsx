@@ -1,3 +1,6 @@
+import { useEffect, useState } from 'react'
+import { getTrainingTopics, getTrainingMaterials } from '../services/trainingService'
+
 type TopicItem = {
   text: string
 }
@@ -7,7 +10,7 @@ type MaterialItem = {
   description: string
 }
 
-const topics: TopicItem[] = [
+const defaultTopics: TopicItem[] = [
   { text: 'Diretrizes éticas nacionais e internacionais' },
   { text: 'Procedimentos operacionais do Sistema CEP/CONEP' },
   { text: 'Avaliação de protocolos de pesquisa' },
@@ -16,7 +19,7 @@ const topics: TopicItem[] = [
   { text: 'Proteção dos participantes de pesquisa' },
 ]
 
-const materials: MaterialItem[] = [
+const defaultMaterials: MaterialItem[] = [
   {
     title: 'Plano de Capacitação CEP/UNIJUÍ',
     description: 'Conheça o plano de capacitação do CEP/UNIJUÍ para membros e pesquisadores.',
@@ -28,6 +31,46 @@ const materials: MaterialItem[] = [
 ]
 
 export function CapacitacoesPage() {
+  const [topics, setTopics] = useState<TopicItem[]>(defaultTopics)
+  const [materials, setMaterials] = useState<MaterialItem[]>(defaultMaterials)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    Promise.all([getTrainingTopics(), getTrainingMaterials()])
+      .then(([topicItems, materialItems]) => {
+        setTopics(topicItems.map((item) => ({ text: item.title ?? '' })))
+        setMaterials(
+          materialItems.map((item) => ({
+            title: item.title ?? '',
+            description: item.description ?? '',
+          })),
+        )
+      })
+      .catch(() => setError('Não foi possível carregar os materiais de capacitação.'))
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) {
+    return (
+      <section className="mx-auto max-w-7xl px-4 pb-12 pt-10 animate-fade-in-up">
+        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+          Carregando materiais de capacitação...
+        </div>
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <section className="mx-auto max-w-7xl px-4 pb-12 pt-10 animate-fade-in-up">
+        <div className="rounded-3xl border border-rose-200 bg-rose-50 p-8 text-rose-900 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-200">
+          {error}
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="mx-auto max-w-7xl px-4 pb-12 pt-10 animate-fade-in-up">
       <div className="hero-gradient relative overflow-hidden rounded-3xl p-8 md:p-12">

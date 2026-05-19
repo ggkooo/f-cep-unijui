@@ -1,4 +1,28 @@
+import { useEffect, useState } from 'react'
+import { getContactInfo, type ContactInfoResource } from '../services/contactService'
+
+const defaultContactInfo: ContactInfoResource = {
+  id: 1,
+  address: 'Rua do Comércio, 3000 - Bairro Universitário',
+  phone: '(55) 3332-0200',
+  email: 'cep@unijui.edu.br',
+  hours: 'Segunda a sexta-feira: 8h às 11h30 e 13h30 às 17h',
+}
+
 export function ContatoPage() {
+  const [contactInfo, setContactInfo] = useState<ContactInfoResource | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    getContactInfo()
+      .then((info) => setContactInfo(info))
+      .catch(() => setError('Não foi possível carregar os dados de contato.'))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const info = contactInfo ?? defaultContactInfo
+
   return (
     <section className="mx-auto max-w-7xl px-4 pb-12 pt-10 animate-fade-in-up">
       <div className="hero-gradient relative overflow-hidden rounded-3xl p-8 md:p-12">
@@ -8,6 +32,18 @@ export function ContatoPage() {
           <p className="mt-3 max-w-3xl text-slate-300">Entre em contato com o Comitê de Ética em Pesquisa da UNIJUÍ.</p>
         </div>
       </div>
+
+      {loading ? (
+        <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+          Carregando informações de contato...
+        </div>
+      ) : null}
+
+      {error ? (
+        <div className="mt-8 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-900 dark:border-rose-900/40 dark:bg-rose-900/20 dark:text-rose-200">
+          {error}
+        </div>
+      ) : null}
 
       <div className="mt-8">
         <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -20,23 +56,23 @@ export function ContatoPage() {
 
             <div>
               <p className="font-semibold text-slate-900 dark:text-white">Endereço:</p>
-              <p>Rua do Comércio, 3000 - Bairro Universitário</p>
-              <p>Ijuí/RS - CEP 98700-000</p>
+              <p>{info.address ?? 'Rua do Comércio, 3000 - Bairro Universitário'}</p>
+              {info.address ? null : <p>Ijuí/RS - CEP 98700-000</p>}
             </div>
 
             <div>
               <p className="font-semibold text-slate-900 dark:text-white">Telefone:</p>
-              <p>(55) 3332-0200</p>
+              <p>{info.phone ?? '(55) 3332-0200'}</p>
             </div>
 
             <div>
               <p className="font-semibold text-slate-900 dark:text-white">E-mail:</p>
-              <p>cep@unijui.edu.br</p>
+              <p>{info.email ?? 'cep@unijui.edu.br'}</p>
             </div>
 
             <div>
               <p className="font-semibold text-slate-900 dark:text-white">Horário de atendimento:</p>
-              <p>Segunda a sexta-feira: 8h às 11h30 e 13h30 às 17h</p>
+              <p>{info.hours ?? 'Segunda a sexta-feira: 8h às 11h30 e 13h30 às 17h'}</p>
             </div>
           </div>
         </article>

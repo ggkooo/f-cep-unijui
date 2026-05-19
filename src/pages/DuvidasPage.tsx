@@ -1,3 +1,6 @@
+import { useEffect, useState } from 'react'
+import { getGuidanceSections } from '../services/guidanceService'
+
 type GuidanceSection = {
   title: string
   points: string[]
@@ -7,7 +10,7 @@ type GuidanceSection = {
   examples?: string[]
 }
 
-const sections: GuidanceSection[] = [
+const defaultSections: GuidanceSection[] = [
   {
     title: 'Uniformizar as informações',
     points: [
@@ -127,6 +130,48 @@ const sections: GuidanceSection[] = [
 ]
 
 export function DuvidasPage() {
+  const [sections, setSections] = useState<GuidanceSection[]>(defaultSections)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    getGuidanceSections()
+      .then((items) =>
+        setSections(
+          items.map((item) => ({
+            title: item.title,
+            points: item.points,
+            warning: item.warning ?? undefined,
+            important: item.important ?? undefined,
+            observation: item.observation ?? undefined,
+            examples: item.examples ?? undefined,
+          })),
+        ),
+      )
+      .catch(() => setError('Não foi possível carregar as orientações.'))
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) {
+    return (
+      <section className="mx-auto max-w-7xl px-4 pb-12 pt-10 animate-fade-in-up">
+        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+          Carregando orientações...
+        </div>
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <section className="mx-auto max-w-7xl px-4 pb-12 pt-10 animate-fade-in-up">
+        <div className="rounded-3xl border border-rose-200 bg-rose-50 p-8 text-rose-900 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-200">
+          {error}
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="mx-auto max-w-7xl px-4 pb-12 pt-10 animate-fade-in-up">
       <div className="hero-gradient relative overflow-hidden rounded-3xl p-8 md:p-12">

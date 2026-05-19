@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { getTutorialFaqs, getTutorials, getTutorialVideos } from '../services/tutorialService'
 
 type TutorialItem = {
   title: string
@@ -7,13 +9,14 @@ type TutorialItem = {
 
 type VideoItem = {
   title: string
+  thumbnail?: string | null
 }
 
 type FaqItem = {
   question: string
 }
 
-const tutorials: TutorialItem[] = [
+const defaultTutorials: TutorialItem[] = [
   {
     title: 'Como se cadastrar na Plataforma Brasil',
     description:
@@ -25,7 +28,7 @@ const tutorials: TutorialItem[] = [
   },
 ]
 
-const videos: VideoItem[] = [
+const defaultVideos: VideoItem[] = [
   { title: 'Plataforma Brasil | Apresentação' },
   { title: 'Plataforma Brasil | Cadastro de Usuário' },
   { title: 'Plataforma Brasil | Cadastro Instituição' },
@@ -40,11 +43,11 @@ const videos: VideoItem[] = [
   { title: 'Plataforma Brasil | Submissão de Projeto III' },
   { title: 'Plataforma Brasil | Submissão de Recursos em projetos' },
   { title: 'Plataforma Brasil | Alerta sobre dados divergentes' },
-  { title: 'Plataforma Brasil | Prasos de Tramitação' },
+  { title: 'Plataforma Brasil | Prazos de Tramitação' },
   { title: 'Plataforma Brasil | Tutorial de Submissão de Projetos de pesquisa' },
 ]
 
-const faqs: FaqItem[] = [
+const defaultFaqs: FaqItem[] = [
   { question: 'Como recuperar minha senha da Plataforma Brasil?' },
   { question: 'Quais documentos são obrigatórios para a submissão de um projeto?' },
   { question: 'Quanto tempo leva para receber o parecer do CEP?' },
@@ -52,6 +55,29 @@ const faqs: FaqItem[] = [
 ]
 
 export function SubmissaoProjetosPage() {
+  const [tutorials, setTutorials] = useState<TutorialItem[]>(defaultTutorials)
+  const [videos, setVideos] = useState<VideoItem[]>([...defaultVideos])
+  const [faqs, setFaqs] = useState<FaqItem[]>([...defaultFaqs])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    Promise.all([getTutorials(), getTutorialVideos(), getTutorialFaqs()])
+      .then(([tutorialItems, videoItems, faqItems]) => {
+        setTutorials(tutorialItems.map((item) => ({
+          title: item.title,
+          description: item.description ?? '',
+        })))
+        setVideos(videoItems.map((item) => ({
+          title: item.title,
+          thumbnail: item.thumbnail_url ?? null,
+        })))
+        setFaqs(faqItems.map((item) => ({ question: item.question })))
+      })
+      .catch(() => setError('Não foi possível carregar os conteúdos de submissão.'))
+      .finally(() => setLoading(false))
+  }, [])
+
   return (
     <section className="mx-auto max-w-7xl px-4 pb-12 pt-10 animate-fade-in-up">
       <div className="hero-gradient relative overflow-hidden rounded-3xl p-8 md:p-12">
@@ -65,6 +91,18 @@ export function SubmissaoProjetosPage() {
           </p>
         </div>
       </div>
+
+      {loading ? (
+        <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+          Carregando conteúdos de submissão...
+        </div>
+      ) : null}
+
+      {error ? (
+        <div className="mt-8 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-900 dark:border-rose-900/40 dark:bg-rose-900/20 dark:text-rose-200">
+          {error}
+        </div>
+      ) : null}
 
       <article className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <header className="border-b border-slate-200 px-5 py-4 dark:border-slate-800">
@@ -89,9 +127,15 @@ export function SubmissaoProjetosPage() {
         <div className="grid grid-cols-1 gap-4 p-5 md:grid-cols-2 xl:grid-cols-3">
           {videos.map((video) => (
             <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800" key={video.title}>
-              <div className="flex h-36 items-center justify-center rounded-lg bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-                <span className="material-icons-outlined mr-2">play_circle</span>
-                Thumbnail do vídeo
+              <div className="flex h-36 items-center justify-center overflow-hidden rounded-lg bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                {video.thumbnail ? (
+                  <img src={video.thumbnail} alt={video.title} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-slate-500 dark:text-slate-400">
+                    <span className="material-icons-outlined mr-2">play_circle</span>
+                    Thumbnail do vídeo
+                  </div>
+                )}
               </div>
               <p className="mt-3 text-sm font-medium text-slate-700 dark:text-slate-200">{video.title}</p>
             </div>

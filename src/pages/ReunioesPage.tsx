@@ -1,3 +1,6 @@
+import { useEffect, useState } from 'react'
+import { getMeetingSchedules, getServiceHours } from '../services/meetingService'
+
 type MeetingScheduleRow = {
   submissionDeadline: string
   meetingDate: string
@@ -8,7 +11,7 @@ type ServiceHourRow = {
   hours: string
 }
 
-const meetingSchedule: MeetingScheduleRow[] = [
+const defaultMeetingSchedule: MeetingScheduleRow[] = [
   { submissionDeadline: 'Recesso do CEP', meetingDate: 'Janeiro/2025' },
   { submissionDeadline: 'Até 20 de janeiro', meetingDate: '28 de fevereiro' },
   { submissionDeadline: 'Até 14 de fevereiro', meetingDate: '14 de março' },
@@ -22,7 +25,7 @@ const meetingSchedule: MeetingScheduleRow[] = [
   { submissionDeadline: 'Até 05 de novembro', meetingDate: '05 de dezembro' },
 ]
 
-const serviceHours: ServiceHourRow[] = [
+const defaultServiceHours: ServiceHourRow[] = [
   { weekday: 'Segunda-feira', hours: '7h45min às 11h30min e das 13h30min às 17h15min' },
   { weekday: 'Terça-feira', hours: '7h45min às 11h30min e das 13h30min às 17h15min' },
   { weekday: 'Quarta-feira', hours: '7h45min às 11h30min e das 13h30min às 17h15min' },
@@ -31,6 +34,64 @@ const serviceHours: ServiceHourRow[] = [
 ]
 
 export function ReunioesPage() {
+  const [meetingSchedule, setMeetingSchedule] = useState<MeetingScheduleRow[]>(defaultMeetingSchedule)
+  const [serviceHours, setServiceHours] = useState<ServiceHourRow[]>(defaultServiceHours)
+  const [loadingSchedule, setLoadingSchedule] = useState(true)
+  const [loadingHours, setLoadingHours] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    getMeetingSchedules(2025)
+      .then((items) =>
+        setMeetingSchedule(
+          items.map((item) => ({
+            submissionDeadline: item.submission_deadline,
+            meetingDate: item.meeting_date,
+          })),
+        ),
+      )
+      .catch(() => setError('Não foi possível carregar o calendário de reuniões.'))
+      .finally(() => setLoadingSchedule(false))
+
+    getServiceHours()
+      .then((items) =>
+        setServiceHours(
+          items.map((item) => ({
+            weekday: item.weekday,
+            hours: item.hours,
+          })),
+        ),
+      )
+      .catch(() =>
+        setError((prev) =>
+          prev
+            ? `${prev} Não foi possível carregar o horário de atendimento.`
+            : 'Não foi possível carregar o horário de atendimento.',
+        ),
+      )
+      .finally(() => setLoadingHours(false))
+  }, [])
+
+  if (loadingSchedule || loadingHours) {
+    return (
+      <section className="mx-auto max-w-7xl px-4 pb-12 pt-10 animate-fade-in-up">
+        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+          Carregando calendário e horários de atendimento...
+        </div>
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <section className="mx-auto max-w-7xl px-4 pb-12 pt-10 animate-fade-in-up">
+        <div className="rounded-3xl border border-rose-200 bg-rose-50 p-8 text-rose-900 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-200">
+          {error}
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="mx-auto max-w-7xl px-4 pb-12 pt-10 animate-fade-in-up">
       <div className="hero-gradient relative overflow-hidden rounded-3xl p-8 md:p-12">

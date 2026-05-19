@@ -1,7 +1,10 @@
+import { useEffect, useState } from 'react'
+import { getDocumentSections } from '../services/documentService'
+
 type DocumentRow = {
   name: string
   description: string
-  file: string
+  file?: string | null
 }
 
 type DocumentSection = {
@@ -9,7 +12,7 @@ type DocumentSection = {
   items: DocumentRow[]
 }
 
-const sections: DocumentSection[] = [
+const defaultSections: DocumentSection[] = [
   {
     title: 'Termos de Consentimento e Assentimento',
     items: [
@@ -93,6 +96,28 @@ const sections: DocumentSection[] = [
 ]
 
 export function DocumentosPage() {
+  const [sections, setSections] = useState<DocumentSection[]>(defaultSections)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    getDocumentSections()
+      .then((results) => {
+        setSections(
+          results.map((result) => ({
+            title: result.title,
+            items: result.items.map((item) => ({
+              name: item.name,
+              description: item.description,
+              file: item.file_url,
+            })),
+          })),
+        )
+      })
+      .catch(() => setError('Não foi possível carregar os modelos de documentos.'))
+      .finally(() => setLoading(false))
+  }, [])
+
   return (
     <section className="mx-auto max-w-7xl px-4 pb-12 pt-10 animate-fade-in-up">
       <div className="hero-gradient relative overflow-hidden rounded-3xl p-8 md:p-12">
@@ -113,6 +138,18 @@ export function DocumentosPage() {
           elementos essenciais exigidos pela legislação e pelas normas éticas.
         </p>
       </div>
+
+      {loading ? (
+        <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+          Carregando documentos...
+        </div>
+      ) : null}
+
+      {error ? (
+        <div className="mt-8 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-900 dark:border-rose-900/40 dark:bg-rose-900/20 dark:text-rose-200">
+          {error}
+        </div>
+      ) : null}
 
       <div className="mt-8 space-y-8">
         {sections.map((section) => (
@@ -137,9 +174,10 @@ export function DocumentosPage() {
                       <td className="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">{item.description}</td>
                       <td className="px-5 py-4 text-sm">
                         <a
-                          className="inline-flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 font-medium text-primary transition-colors hover:border-primary hover:bg-primary hover:text-white dark:border-primary/40 dark:bg-primary/20 dark:text-blue-300 dark:hover:text-white"
-                          download
-                          href={item.file}
+                          className={`inline-flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 font-medium text-primary transition-colors hover:border-primary hover:bg-primary hover:text-white dark:border-primary/40 dark:bg-primary/20 dark:text-blue-300 dark:hover:text-white ${!item.file ? 'cursor-not-allowed opacity-50' : ''}`}
+                          download={Boolean(item.file)}
+                          href={item.file ?? '#'}
+                          aria-disabled={!item.file}
                         >
                           <span className="material-icons-outlined text-base">download</span>
                           Download
