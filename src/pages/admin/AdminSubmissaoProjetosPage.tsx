@@ -103,7 +103,7 @@ export function AdminSubmissaoProjetosPage() {
     setTutorials((current) => [
       ...current,
       {
-        id: Date.now(),
+        id: -Date.now(),
         title: 'Novo tutorial',
         description: 'Descrição do tutorial',
         file_url: '',
@@ -117,10 +117,10 @@ export function AdminSubmissaoProjetosPage() {
     setVideos((current) => [
       ...current,
       {
-        id: Date.now(),
+        id: -Date.now(),
         title: 'Novo vídeo',
+        url: '',
         thumbnail_url: '',
-        video_url: '',
         sort_order: current.length + 1,
       },
     ])
@@ -130,7 +130,7 @@ export function AdminSubmissaoProjetosPage() {
     setFaqs((current) => [
       ...current,
       {
-        id: Date.now(),
+        id: -Date.now(),
         question: 'Nova pergunta',
         answer: 'Resposta da pergunta',
         sort_order: current.length + 1,
@@ -237,21 +237,23 @@ export function AdminSubmissaoProjetosPage() {
                         className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                       />
                     </div>
-                    <div>
+                    <div className="md:col-span-2">
                       <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">URL do vídeo</label>
                       <input
-                        value={item.video_url ?? ''}
-                        onChange={(event) => updateVideo(index, 'video_url', event.target.value)}
+                        value={item.url ?? ''}
+                        onChange={(event) => updateVideo(index, 'url', event.target.value)}
                         className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                       />
                     </div>
-                    <div>
-                      <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">URL da miniatura</label>
-                      <input
-                        value={item.thumbnail_url ?? ''}
-                        onChange={(event) => updateVideo(index, 'thumbnail_url', event.target.value)}
-                        className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-                      />
+                    <div className="md:col-span-1">
+                      <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Thumbnail atual</label>
+                      <div className="rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200">
+                        {item.thumbnail_url ? (
+                          <span>{item.thumbnail_url}</span>
+                        ) : (
+                          <span>Será gerada automaticamente após salvar.</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
