@@ -16,18 +16,15 @@ const linkGroups: LinkGroup[] = [
   {
     title: 'Recursos',
     links: [
-      { label: 'Downloads', href: '/documentos' },
       { label: 'Legislação', href: '/normativas' },
       { label: 'Tutoriais', href: '/submissao-projetos' },
-      { label: 'Webinários', href: '/capacitacoes' },
+      { label: 'Capacitações', href: '/capacitacoes' },
     ],
   },
   {
     title: 'Institucional',
     links: [
-      { label: 'Sobre o CEP', href: '/' },
       { label: 'Membros', href: '/membros' },
-      { label: 'VRPGPG', href: '/contato' },
       { label: 'Contatos', href: '/contato' },
     ],
   },
