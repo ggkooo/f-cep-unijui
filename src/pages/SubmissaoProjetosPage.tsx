@@ -5,15 +5,18 @@ import { getTutorialFaqs, getTutorials, getTutorialVideos } from '../services/tu
 type TutorialItem = {
   title: string
   description: string
+  url: string // Adicionado campo de URL
 }
 
 type VideoItem = {
   title: string
   thumbnail?: string | null
+  url: string
 }
 
 type FaqItem = {
   question: string
+  answer: string
 }
 
 const defaultTutorials: TutorialItem[] = [
@@ -21,38 +24,47 @@ const defaultTutorials: TutorialItem[] = [
     title: 'Como se cadastrar na Plataforma Brasil',
     description:
       'Tutorial passo a passo para realizar o cadastro inicial na Plataforma Brasil, incluindo a criação de conta e validação de dados.',
+    url: 'https://plataformabrasil.saude.gov.br/login.jsf',
   },
   {
     title: 'Manual do Pesquisador',
     description: 'Guia completo desenvolvido pela CONEP para orientar os pesquisadores na utilização da Plataforma Brasil.',
+    url: 'https://plataformabrasil.saude.gov.br/login.jsf',
   },
 ]
 
 const defaultVideos: VideoItem[] = [
-  { title: 'Plataforma Brasil | Apresentação' },
-  { title: 'Plataforma Brasil | Cadastro de Usuário' },
-  { title: 'Plataforma Brasil | Cadastro Instituição' },
-  { title: 'Plataforma Brasil | Pesquisadores Assistentes' },
-  { title: 'Plataforma Brasil | Como Submeter um Projeto I' },
-  { title: 'Plataforma Brasil | Como Submeter um Projeto II' },
-  { title: 'Plataforma Brasil | Solicitação de alteração de Pesquisador Responsável' },
-  { title: 'Plataforma Brasil | Resposta de Pendência' },
-  { title: 'Plataforma Brasil | Submissão da Emenda I' },
-  { title: 'Plataforma Brasil | Solicitação de retirada de Projetos de Pesquisa' },
-  { title: 'Plataforma Brasil | Envio de Notificação' },
-  { title: 'Plataforma Brasil | Submissão de Projeto III' },
-  { title: 'Plataforma Brasil | Submissão de Recursos em projetos' },
-  { title: 'Plataforma Brasil | Alerta sobre dados divergentes' },
-  { title: 'Plataforma Brasil | Prazos de Tramitação' },
-  { title: 'Plataforma Brasil | Tutorial de Submissão de Projetos de pesquisa' },
+  { title: 'Plataforma Brasil | Apresentação', url: 'https://www.youtube.com/watch?v=video1' },
+  { title: 'Plataforma Brasil | Cadastro de Usuário', url: 'https://www.youtube.com/watch?v=video2' },
+  { title: 'Plataforma Brasil | Cadastro Instituição', url: 'https://www.youtube.com/watch?v=video3' },
+  { title: 'Plataforma Brasil | Pesquisadores Assistentes', url: 'https://www.youtube.com/watch?v=video4' },
+  { title: 'Plataforma Brasil | Como Submeter um Projeto I', url: 'https://www.youtube.com/watch?v=video5' },
+  { title: 'Plataforma Brasil | Como Submeter um Projeto II', url: 'https://www.youtube.com/watch?v=video6' },
+  { title: 'Plataforma Brasil | Solicitação de alteração de Pesquisador Responsável', url: 'https://www.youtube.com/watch?v=video7' },
+  { title: 'Plataforma Brasil | Resposta de Pendência', url: 'https://www.youtube.com/watch?v=video8' },
+  { title: 'Plataforma Brasil | Submissão da Emenda I', url: 'https://www.youtube.com/watch?v=video9' },
+  { title: 'Plataforma Brasil | Solicitação de retirada de Projetos de Pesquisa', url: 'https://www.youtube.com/watch?v=video10' },
+  { title: 'Plataforma Brasil | Envio de Notificação', url: 'https://www.youtube.com/watch?v=video11' },
+  { title: 'Plataforma Brasil | Submissão de Projeto III', url: 'https://www.youtube.com/watch?v=video12' },
+  { title: 'Plataforma Brasil | Submissão de Recursos em projetos', url: 'https://www.youtube.com/watch?v=video13' },
+  { title: 'Plataforma Brasil | Alerta sobre dados divergentes', url: 'https://www.youtube.com/watch?v=video14' },
+  { title: 'Plataforma Brasil | Prazos de Tramitação', url: 'https://www.youtube.com/watch?v=video15' },
+  { title: 'Plataforma Brasil | Tutorial de Submissão de Projetos de pesquisa', url: 'https://www.youtube.com/watch?v=video16' },
 ]
 
 const defaultFaqs: FaqItem[] = [
-  { question: 'Como recuperar minha senha da Plataforma Brasil?' },
-  { question: 'Quais documentos são obrigatórios para a submissão de um projeto?' },
-  { question: 'Quanto tempo leva para receber o parecer do CEP?' },
-  { question: 'Posso iniciar minha pesquisa enquanto aguardo o parecer do CEP?' },
+  { question: 'Como recuperar minha senha da Plataforma Brasil?', answer: 'Você pode recuperar sua senha clicando no link "Esqueceu sua senha?" na página de login da Plataforma Brasil e seguindo as instruções.' },
+  { question: 'Quais documentos são obrigatórios para a submissão de um projeto?', answer: 'Os documentos obrigatórios variam conforme o tipo de pesquisa, mas geralmente incluem o Projeto Detalhado, Termo de Consentimento Livre e Esclarecido (TCLE), e o Orçamento Detalhado. Consulte o Manual do Pesquisador para mais detalhes.' },
+  { question: 'Quanto tempo leva para receber o parecer do CEP?', answer: 'O prazo para o parecer do CEP pode variar, mas geralmente é de até 30 dias após a submissão completa da documentação. Projetos de alta complexidade podem levar mais tempo.' },
+  { question: 'Posso iniciar minha pesquisa enquanto aguardo o parecer do CEP?', answer: 'Não. É estritamente proibido iniciar qualquer atividade de pesquisa envolvendo seres humanos antes da aprovação formal do CEP. A pesquisa só pode começar após a emissão do parecer favorável.' },
 ]
+
+// Helper function to extract YouTube video ID
+const getYouTubeVideoId = (url: string): string | null => {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+};
 
 export function SubmissaoProjetosPage() {
   const [tutorials, setTutorials] = useState<TutorialItem[]>(defaultTutorials)
@@ -60,6 +72,8 @@ export function SubmissaoProjetosPage() {
   const [faqs, setFaqs] = useState<FaqItem[]>([...defaultFaqs])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+
 
   useEffect(() => {
     Promise.all([getTutorials(), getTutorialVideos(), getTutorialFaqs()])
@@ -67,16 +81,26 @@ export function SubmissaoProjetosPage() {
         setTutorials(tutorialItems.map((item) => ({
           title: item.title,
           description: item.description ?? '',
+          url: item.url ?? item.file_url ?? '#', // Prioriza 'url', depois 'file_url', senão '#'
         })))
-        setVideos(videoItems.map((item) => ({
-          title: item.title,
-          thumbnail: item.thumbnail_url ?? null,
-        })))
-        setFaqs(faqItems.map((item) => ({ question: item.question })))
+        setVideos(videoItems.map((item) => {
+          const youtubeId = item.url ? getYouTubeVideoId(item.url) : null;
+          const generatedThumbnail = youtubeId ? `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg` : null;
+          return {
+            title: item.title,
+            thumbnail: item.thumbnail_url ?? generatedThumbnail ?? null, // Prioritize API thumbnail, then generated, then null
+            url: item.url ?? '#',
+          };
+        }))
+        setFaqs(faqItems.map((item) => ({ question: item.question, answer: item.answer ?? 'Sem resposta disponível.' })))
       })
       .catch(() => setError('Não foi possível carregar os conteúdos de submissão.'))
       .finally(() => setLoading(false))
   }, [])
+
+  const toggleFaq = (index: number) => {
+    setOpenFaqIndex(openFaqIndex === index ? null : index);
+  };
 
   return (
     <section className="mx-auto max-w-7xl px-4 pb-12 pt-10 animate-fade-in-up">
@@ -114,6 +138,11 @@ export function SubmissaoProjetosPage() {
             <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800" key={item.title}>
               <h3 className="text-base font-semibold text-slate-900 dark:text-white">{item.title}</h3>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{item.description}</p>
+              {item.url && (
+                <div className="mt-3 text-center text-lg text-black dark:text-white">
+                  Acesse a Plataforma Brasil para mais informações
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -126,7 +155,7 @@ export function SubmissaoProjetosPage() {
 
         <div className="grid grid-cols-1 gap-4 p-5 md:grid-cols-2 xl:grid-cols-3">
           {videos.map((video) => (
-            <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800" key={video.title}>
+            <a href={video.url} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-slate-200 p-4 dark:border-slate-800 block" key={video.title}>
               <div className="flex h-36 items-center justify-center overflow-hidden rounded-lg bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                 {video.thumbnail ? (
                   <img src={video.thumbnail} alt={video.title} className="h-full w-full object-cover" />
@@ -138,7 +167,7 @@ export function SubmissaoProjetosPage() {
                 )}
               </div>
               <p className="mt-3 text-sm font-medium text-slate-700 dark:text-slate-200">{video.title}</p>
-            </div>
+            </a>
           ))}
         </div>
       </article>
@@ -149,9 +178,20 @@ export function SubmissaoProjetosPage() {
         </header>
 
         <ul className="divide-y divide-slate-200 dark:divide-slate-800">
-          {faqs.map((item) => (
+          {faqs.map((item, index) => (
             <li className="px-5 py-4 text-sm text-slate-700 dark:text-slate-200" key={item.question}>
-              {item.question}
+              <button
+                className="flex w-full items-center justify-between text-left font-medium text-slate-900 dark:text-white"
+                onClick={() => toggleFaq(index)}
+              >
+                {item.question}
+                <span className="material-icons-outlined">
+                  {openFaqIndex === index ? 'expand_less' : 'expand_more'}
+                </span>
+              </button>
+              {openFaqIndex === index && (
+                <p className="mt-2 text-slate-600 dark:text-slate-300">{item.answer}</p>
+              )}
             </li>
           ))}
         </ul>
@@ -169,7 +209,7 @@ export function SubmissaoProjetosPage() {
           </p>
           <p>
             Consulte também nossas páginas de <Link className="font-medium text-primary hover:underline" to="/documentos">Modelos de Documentos</Link>{' '}
-            e <Link className="font-medium text-primary hover:underline" to="/#faq">Perguntas Frequentes</Link>.
+            e <Link className="font-medium text-primary hover=" to="/#faq">Perguntas Frequentes</Link>.
           </p>
         </div>
       </article>

@@ -113,10 +113,10 @@ export function ReunioesPage() {
           <table className="min-w-full border-collapse">
             <thead className="bg-slate-50 dark:bg-slate-900">
               <tr>
-                <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                <th className="w-1/2 px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                   Prazo para inserir projetos na Plataforma Brasil*
                 </th>
-                <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                <th className="w-1/2 px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                   Data da reunião (Análise dos projetos pelo CEP)
                 </th>
               </tr>
@@ -124,8 +124,8 @@ export function ReunioesPage() {
             <tbody>
               {meetingSchedule.map((row) => (
                 <tr className="border-t border-slate-200 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/40" key={row.submissionDeadline}>
-                  <td className="px-5 py-4 text-sm font-medium text-slate-700 dark:text-slate-200">{row.submissionDeadline}</td>
-                  <td className="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">{row.meetingDate}</td>
+                  <td className="w-1/2 px-5 py-4 text-center text-sm font-medium text-slate-700 dark:text-slate-200">{row.submissionDeadline}</td>
+                  <td className="w-1/2 px-5 py-4 text-center text-sm text-slate-600 dark:text-slate-300">{row.meetingDate}</td>
                 </tr>
               ))}
             </tbody>
@@ -146,15 +146,15 @@ export function ReunioesPage() {
           <table className="min-w-full border-collapse">
             <thead className="bg-slate-50 dark:bg-slate-900">
               <tr>
-                <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Dia da semana</th>
-                <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Horário de funcionamento</th>
+                <th className="w-1/2 px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Dia da semana</th>
+                <th className="w-1/2 px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Horário de funcionamento</th>
               </tr>
             </thead>
             <tbody>
               {serviceHours.map((row) => (
                 <tr className="border-t border-slate-200 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/40" key={row.weekday}>
-                  <td className="px-5 py-4 text-sm font-medium text-slate-700 dark:text-slate-200">{row.weekday}</td>
-                  <td className="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">{row.hours}</td>
+                  <td className="w-1/2 px-5 py-4 text-center text-sm font-medium text-slate-700 dark:text-slate-200">{row.weekday}</td>
+                  <td className="w-1/2 px-5 py-4 text-center text-sm text-slate-600 dark:text-slate-300">{row.hours}</td>
                 </tr>
               ))}
             </tbody>
