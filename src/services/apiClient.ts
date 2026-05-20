@@ -56,7 +56,7 @@ const buildBody = (body: unknown): BodyInit | undefined =>
 
 const buildJsonHeaders = (body: unknown, options: RequestInit = {}): HeadersInit =>
   body instanceof FormData
-    ? (options.headers as HeadersInit | undefined)
+    ? (options.headers ?? {})
     : {
         'Content-Type': 'application/json',
         ...(options.headers as Record<string, string> | undefined),
