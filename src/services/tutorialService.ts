@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut } from './apiClient'
+import { apiGet, apiPost, apiPut, apiDelete } from './apiClient'
 import type { TutorialResource, TutorialVideoResource, TutorialFaqResource } from './types'
 
 export type { TutorialResource, TutorialVideoResource, TutorialFaqResource }
@@ -29,3 +29,9 @@ export const updateTutorialFaqs = async (faqs: TutorialFaqResource[]): Promise<T
         : apiPost<TutorialFaqResource>('/api/tutorial-faqs', faq),
     ),
   )
+
+export const deleteTutorial = (id: number): Promise<{ message: string }> =>
+  apiDelete<{ message: string }>(`/api/tutorials/${id}`)
+
+export const deleteTutorialFaq = (id: number): Promise<{ message: string }> =>
+  apiDelete<{ message: string }>(`/api/tutorial-faqs/${id}`)
