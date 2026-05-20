@@ -107,7 +107,7 @@ export function AdminSubmissaoProjetosPage() {
         title: 'Novo tutorial',
         description: 'Descrição do tutorial',
         file_url: '',
-        original_filename: '',
+        url: '', // Inicializando o novo campo 'url'
         sort_order: current.length + 1,
       },
     ])
@@ -216,6 +216,15 @@ export function AdminSubmissaoProjetosPage() {
                         value={item.description ?? ''}
                         onChange={(event) => updateTutorial(index, 'description', event.target.value)}
                         className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                      />
+                    </div>
+                    <div className="md:col-span-2"> {/* Ocupa as duas colunas para a URL */}
+                      <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">URL do Tutorial</label>
+                      <input
+                        value={item.url ?? ''}
+                        onChange={(event) => updateTutorial(index, 'url', event.target.value)}
+                        className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                        placeholder="Ex: https://www.exemplo.com/tutorial"
                       />
                     </div>
                   </div>
