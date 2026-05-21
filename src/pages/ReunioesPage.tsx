@@ -41,35 +41,50 @@ export function ReunioesPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    getMeetingSchedules(2025)
-      .then((items) =>
-        setMeetingSchedule(
-          items.map((item) => ({
-            submissionDeadline: item.submission_deadline,
-            meetingDate: item.meeting_date,
-          })),
-        ),
-      )
-      .catch(() => setError('Não foi possível carregar o calendário de reuniões.'))
-      .finally(() => setLoadingSchedule(false))
+    const fetchMeetingSchedules = async () => {
+      try {
+        const items = await getMeetingSchedules() // Removido o ano para buscar todos os dados
+        if (items && items.length > 0) {
+          setMeetingSchedule(
+            items.map((item) => ({
+              submissionDeadline: item.submission_deadline,
+              meetingDate: item.meeting_date,
+            })),
+          )
+        }
+        // Se 'items' for vazio, 'meetingSchedule' manterá o valor inicial (defaultMeetingSchedule).
+      } catch (err) {
+        setError('Não foi possível carregar o calendário de reuniões.')
+      } finally {
+        setLoadingSchedule(false)
+      }
+    }
 
-    getServiceHours()
-      .then((items) =>
-        setServiceHours(
-          items.map((item) => ({
-            weekday: item.weekday,
-            hours: item.hours,
-          })),
-        ),
-      )
-      .catch(() =>
+    const fetchServiceHours = async () => {
+      try {
+        const items = await getServiceHours()
+        if (items && items.length > 0) {
+          setServiceHours(
+            items.map((item) => ({
+              weekday: item.weekday,
+              hours: item.hours,
+            })),
+          )
+        }
+        // Se 'items' for vazio, 'serviceHours' manterá o valor inicial (defaultServiceHours).
+      } catch (err) {
         setError((prev) =>
           prev
             ? `${prev} Não foi possível carregar o horário de atendimento.`
             : 'Não foi possível carregar o horário de atendimento.',
-        ),
-      )
-      .finally(() => setLoadingHours(false))
+        )
+      } finally {
+        setLoadingHours(false)
+      }
+    }
+
+    fetchMeetingSchedules()
+    fetchServiceHours()
   }, [])
 
   if (loadingSchedule || loadingHours) {
@@ -97,7 +112,7 @@ export function ReunioesPage() {
       <div className="hero-gradient relative overflow-hidden rounded-3xl p-8 md:p-12">
         <div className="absolute right-0 top-0 h-52 w-52 rounded-full bg-primary/20 blur-3xl" />
         <div className="relative z-10">
-          <h1 className="text-3xl font-bold text-white md:text-4xl">Calendário de Reuniões CEP 2025</h1>
+          <h1 className="text-3xl font-bold text-white md:text-4xl">Calendário de Reuniões CEP</h1>
           <p className="mt-3 max-w-3xl text-slate-300">
             Consulte os prazos para submissão de projetos na Plataforma Brasil e as datas previstas para análise dos projetos pelo CEP.
           </p>
