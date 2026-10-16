@@ -1,0 +1,10 @@
+# Permite que todos os buscadores (Google, Bing, etc.) indexem as páginas públicas
+User-agent: *
+Allow: /
+
+# Bloqueia a indexação do painel administrativo
+Disallow: /admin/
+Disallow: /admin
+
+# Opcional: Adicione a URL do seu sitemap se possuir um
+# Sitemap: http://200.132.193.104/sitemap.xml
