@@ -55,14 +55,12 @@ export type ServiceHourResource = {
   sort_order?: number
 }
 
-// CORREÇÃO AQUI: Mudado de 'title' para 'text' para bater com o seu Admin e Página de Listagem
 export type TrainingTopicResource = {
   id: number
   text: string
   sort_order?: number
 }
 
-// CORREÇÃO AQUI: Geralmente materiais usam 'title' para o nome do arquivo/documento
 export type TrainingMaterialResource = {
   id: number
   title: string
